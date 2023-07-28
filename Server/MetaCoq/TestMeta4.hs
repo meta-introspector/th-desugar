@@ -1,0 +1,2 @@
+$(stringE . show =<<  reify 'test_t100)
+"VarI Server.MetaCoq.TestMeta3.test_t100 (ForallT [KindedTV m_7566047373983534213 InferredSpec (AppT (AppT ArrowT StarT) StarT),KindedTV p_7566047373983534214 InferredSpec StarT] [AppT (ConT Language.Haskell.TH.Desugar.Reify.DsMonad) (VarT m_7566047373983534213)] (AppT (AppT ArrowT (VarT p_7566047373983534214)) (AppT (VarT m_7566047373983534213) (AppT ListT (AppT (ConT GHC.Maybe.Maybe) (ConT Language.Haskell.TH.Desugar.AST.DInfo)))))) Nothing"
