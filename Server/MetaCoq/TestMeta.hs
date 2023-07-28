@@ -2585,7 +2585,7 @@ deriving stock instance Generic Global_declarations
 -- deriving stock instance Lift (List T36) 
 -- deriving stock instance Lift (List Term) 
 -- deriving stock instance Lift (Option (List T36)) 
-deriving stock instance Lift Kername 
+--deriving stock instance Lift Kername 
 -- deriving stock instance Lift (Option Term) 
 -- deriving stock instance Lift (Predicate Term)
 -- deriving stock instance Lift (T25)
@@ -2617,14 +2617,14 @@ deriving  instance Lift (Option Term)
 deriving  instance Lift (Context_decl Term)
 --deriving  instance Lift (List term)
 --deriving  instance Lift (Predicate Term)
-deriving  instance Lift (T25) 
+--deriving  instance Lift (T25) 
 deriving  instance Lift (Prod Global_env Bool) 
-deriving  instance Lift (Prod Global_env Term)
-deriving  instance Lift (TGlobalDeclaration) 
+--deriving  instance Lift (Prod Global_env Term)
+--deriving  instance Lift (TGlobalDeclaration) 
 --deriving  instance Lift Kername
-deriving  instance Lift  T35
-deriving  instance Lift (T14) 
-deriving  instance Lift T25S 
+--deriving  instance Lift  T35
+--deriving  instance Lift (T14) 
+--deriving  instance Lift T25S 
 deriving  instance Lift (List (TGlobalDeclaration))
 
 compare30 :: (T25) -> (T25) -> Comparison
@@ -2939,3 +2939,10 @@ deriving  instance  Lift (Predicate Term)
 --  type KIND MyString = SCALAR
 
 --derivePersistField Byte
+deriving  instance Lift Kername
+deriving  instance Lift T25
+deriving  instance Lift T25S
+deriving  instance Lift T35
+deriving  instance Lift BigMama
+deriving  instance Lift TGlobalDeclaration
+deriving  instance Lift  T14
