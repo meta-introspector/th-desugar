@@ -1,0 +1,391 @@
+type Desugar :: * -> * -> Constraint
+class Desugar th ds | ds -> th where
+  desugar :: DsMonad q => th -> q ds
+  sweeten :: ds -> th
+  {-# MINIMAL desugar, sweeten #-}
+flattenDValD :: Quasi q => DLetDec -> q [DLetDec]
+getRecordSelectors :: DsMonad q => [DCon] -> q [DLetDec]
+mkExtraDKindBinders :: DsMonad q => DKind -> q [DTyVarBndrUnit]
+type AnnTarget :: *
+data AnnTarget
+  = ModuleAnnotation | TypeAnnotation Name | ValueAnnotation Name
+type Bang :: *
+data Bang = Bang SourceUnpackedness SourceStrictness
+type DBangType :: *
+type DBangType = (Bang, DType)
+type DClause :: *
+data DClause = DClause [DPat] DExp
+type DCon :: *
+data DCon = DCon [DTyVarBndrSpec] DCxt Name DConFields DType
+type DConFields :: *
+data DConFields
+  = DNormalC DDeclaredInfix [DBangType] | DRecC [DVarBangType]
+type DCxt :: *
+type DCxt = [DPred]
+type DDec :: *
+data DDec
+  = DLetDec DLetDec
+  | DDataD DataFlavor
+           DCxt
+           Name
+           [DTyVarBndrUnit]
+           (Maybe DKind)
+           [DCon]
+           [DDerivClause]
+  | DTySynD Name [DTyVarBndrUnit] DType
+  | DClassD DCxt Name [DTyVarBndrUnit] [FunDep] [DDec]
+  | DInstanceD (Maybe Overlap)
+               (Maybe [DTyVarBndrUnit])
+               DCxt
+               DType
+               [DDec]
+  | DForeignD DForeign
+  | DOpenTypeFamilyD DTypeFamilyHead
+  | DClosedTypeFamilyD DTypeFamilyHead [DTySynEqn]
+  | DDataFamilyD Name [DTyVarBndrUnit] (Maybe DKind)
+  | DDataInstD DataFlavor
+               DCxt
+               (Maybe [DTyVarBndrUnit])
+               DType
+               (Maybe DKind)
+               [DCon]
+               [DDerivClause]
+  | DTySynInstD DTySynEqn
+  | DRoleAnnotD Name [Role]
+  | DStandaloneDerivD (Maybe DDerivStrategy)
+                      (Maybe [DTyVarBndrUnit])
+                      DCxt
+                      DType
+  | DDefaultSigD Name DType
+  | DPatSynD Name PatSynArgs DPatSynDir DPat
+  | DPatSynSigD Name DPatSynType
+  | DKiSigD Name DKind
+  | DDefaultD [DType]
+type DDeclaredInfix :: *
+type DDeclaredInfix = Bool
+type DDerivClause :: *
+data DDerivClause = DDerivClause (Maybe DDerivStrategy) DCxt
+type DDerivStrategy :: *
+data DDerivStrategy
+  = DStockStrategy
+  | DAnyclassStrategy
+  | DNewtypeStrategy
+  | DViaStrategy DType
+type DExp :: *
+data DExp
+  = DVarE Name
+  | DConE Name
+  | DLitE Lit
+  | DAppE DExp DExp
+  | DAppTypeE DExp DType
+  | DLamE [Name] DExp
+  | DCaseE DExp [DMatch]
+  | DLetE [DLetDec] DExp
+  | DSigE DExp DType
+  | DStaticE DExp
+type DFamilyResultSig :: *
+data DFamilyResultSig
+  = DNoSig | DKindSig DKind | DTyVarSig DTyVarBndrUnit
+type DForallTelescope :: *
+data DForallTelescope
+  = DForallVis [DTyVarBndrUnit] | DForallInvis [DTyVarBndrSpec]
+type DForeign :: *
+data DForeign
+  = DImportF Callconv Safety String Name DType
+  | DExportF Callconv String Name DType
+type DFunArgs :: *
+data DFunArgs
+  = DFANil
+  | DFAForalls DForallTelescope DFunArgs
+  | DFACxt DCxt DFunArgs
+  | DFAAnon DType DFunArgs
+type DInfo :: *
+data DInfo
+  = DTyConI DDec (Maybe [DInstanceDec])
+  | DVarI Name DType (Maybe Name)
+  | DTyVarI Name DKind
+  | DPrimTyConI Name Int Bool
+  | DPatSynI Name DPatSynType
+type DInstanceDec :: *
+type DInstanceDec = DDec
+type DKind :: *
+type DKind = DType
+type DLetDec :: *
+data DLetDec
+  = DFunD Name [DClause]
+  | DValD DPat DExp
+  | DSigD Name DType
+  | DInfixD Fixity Name
+  | DPragmaD DPragma
+type DMatch :: *
+data DMatch = DMatch DPat DExp
+type DPat :: *
+data DPat
+  = DLitP Lit
+  | DVarP Name
+  | DConP Name [DType] [DPat]
+  | DTildeP DPat
+  | DBangP DPat
+  | DSigP DPat DType
+  | DWildP
+type DPatSynDir :: *
+data DPatSynDir = DUnidir | DImplBidir | DExplBidir [DClause]
+type DPatSynType :: *
+type DPatSynType = DType
+type DPragma :: *
+data DPragma
+  = DInlineP Name Inline RuleMatch Phases
+  | DSpecialiseP Name DType (Maybe Inline) Phases
+  | DSpecialiseInstP DType
+  | DRuleP String
+           (Maybe [DTyVarBndrUnit])
+           [DRuleBndr]
+           DExp
+           DExp
+           Phases
+  | DAnnP AnnTarget DExp
+  | DLineP Int String
+  | DCompleteP [Name] (Maybe Name)
+  | DOpaqueP Name
+type DPred :: *
+type DPred = DType
+type DRuleBndr :: *
+data DRuleBndr = DRuleVar Name | DTypedRuleVar Name DType
+type DSubst :: *
+type DSubst = M.Map Name DType
+type DTySynEqn :: *
+data DTySynEqn = DTySynEqn (Maybe [DTyVarBndrUnit]) DType DType
+type DTyVarBndr :: * -> *
+data DTyVarBndr flag
+  = DPlainTV Name flag | DKindedTV Name flag DKind
+type DTyVarBndrSpec :: *
+type DTyVarBndrSpec = DTyVarBndr Specificity
+type DTyVarBndrUnit :: *
+type DTyVarBndrUnit = DTyVarBndr ()
+type DType :: *
+data DType
+  = DForallT DForallTelescope DType
+  | DConstrainedT DCxt DType
+  | DAppT DType DType
+  | DAppKindT DType DKind
+  | DSigT DType DKind
+  | DVarT Name
+  | DConT Name
+  | DArrowT
+  | DLitT TyLit
+  | DWildCardT
+type DTypeArg :: *
+data DTypeArg = DTANormal DType | DTyArg DKind
+type DTypeFamilyHead :: *
+data DTypeFamilyHead
+  = DTypeFamilyHead Name
+                    [DTyVarBndrUnit]
+                    DFamilyResultSig
+                    (Maybe InjectivityAnn)
+type DVarBangType :: *
+type DVarBangType = (Name, Bang, DType)
+type DVisFunArg :: *
+data DVisFunArg = DVisFADep DTyVarBndrUnit | DVisFAAnon DType
+type DataFlavor :: *
+data DataFlavor = Newtype | Data | TypeData
+type DerivingClause :: *
+type DerivingClause = DerivClause
+type role DsM representational nominal
+type DsM :: (* -> *) -> * -> *
+newtype DsM q a
+  = Language.Haskell.TH.Desugar.Reify.DsM (transformers-0.5.6.2:Control.Monad.Trans.Reader.ReaderT
+                                             [Dec] q a)
+type DsMonad :: (* -> *) -> Constraint
+class (Quasi m, MonadFail m) => DsMonad m where
+  localDeclarations :: m [Dec]
+  {-# MINIMAL localDeclarations #-}
+type ForallTelescope :: *
+data ForallTelescope
+  = ForallVis [TyVarBndrUnit] | ForallInvis [TyVarBndrSpec]
+type FunArgs :: *
+data FunArgs
+  = FANil
+  | FAForalls ForallTelescope FunArgs
+  | FACxt Cxt FunArgs
+  | FAAnon Type FunArgs
+type IgnoreKinds :: *
+data IgnoreKinds = YesIgnore | NoIgnore
+type InjectivityAnn :: *
+data InjectivityAnn = InjectivityAnn Name [Name]
+type Overlap :: *
+data Overlap = Overlappable | Overlapping | Overlaps | Incoherent
+type PatM :: (* -> *) -> * -> *
+type PatM q =
+  transformers-0.5.6.2:Control.Monad.Trans.Writer.Lazy.WriterT
+    [(Name, DExp)] q
+  :: * -> *
+type PatSynArgs :: *
+data PatSynArgs
+  = PrefixPatSyn [Name] | InfixPatSyn Name Name | RecordPatSyn [Name]
+type Role :: *
+data Role = NominalR | RepresentationalR | PhantomR | InferR
+type SourceStrictness :: *
+data SourceStrictness
+  = NoSourceStrictness | SourceLazy | SourceStrict
+type SourceUnpackedness :: *
+data SourceUnpackedness
+  = NoSourceUnpackedness | SourceNoUnpack | SourceUnpack
+type Specificity :: *
+data Specificity = SpecifiedSpec | InferredSpec
+type TypeArg :: *
+data TypeArg = TANormal Type | TyArg Kind
+type VisFunArg :: *
+data VisFunArg = VisFADep TyVarBndrUnit | VisFAAnon Type
+allNamesIn :: Data.Data.Data a => a -> [Name]
+applyDExp :: DExp -> [DExp] -> DExp
+applyDType :: DType -> [DTypeArg] -> DType
+applyType :: Type -> [TypeArg] -> Type
+bindIP :: a -> (GHC.Classes.IP name a => r) -> r
+changeDTVFlags ::
+  newFlag -> [DTyVarBndr oldFlag] -> [DTyVarBndr newFlag]
+clauseToTH :: DClause -> Clause
+conToTH :: DCon -> Con
+cxtToTH :: DCxt -> Cxt
+dPatToDExp :: DPat -> DExp
+dTyVarBndrToDType :: DTyVarBndr flag -> DType
+dataConNameToCon :: DsMonad q => Name -> q Con
+dataConNameToDataName :: DsMonad q => Name -> q Name
+decToTH :: DDec -> Dec
+decsToTH :: [DDec] -> [Dec]
+derivClauseToTH :: DDerivClause -> [DerivClause]
+dsBangType :: DsMonad q => BangType -> q DBangType
+dsBody :: DsMonad q => Body -> [Dec] -> DExp -> q DExp
+dsClauses :: DsMonad q => MatchContext -> [Clause] -> q [DClause]
+dsComp :: DsMonad q => [Stmt] -> q DExp
+dsCon :: DsMonad q => [DTyVarBndrUnit] -> DType -> Con -> q [DCon]
+dsCxt :: DsMonad q => Cxt -> q DCxt
+dsDataDec ::
+  DsMonad q =>
+  DataFlavor
+  -> Cxt
+  -> Name
+  -> [TyVarBndrUnit]
+  -> Maybe Kind
+  -> [Con]
+  -> [DerivingClause]
+  -> q [DDec]
+dsDataInstDec ::
+  DsMonad q =>
+  DataFlavor
+  -> Cxt
+  -> Name
+  -> Maybe [TyVarBndrUnit]
+  -> [TypeArg]
+  -> Maybe Kind
+  -> [Con]
+  -> [DerivingClause]
+  -> q [DDec]
+dsDec :: DsMonad q => Dec -> q [DDec]
+dsDecs :: DsMonad q => [Dec] -> q [DDec]
+dsDerivClause :: DsMonad q => DerivingClause -> q DDerivClause
+dsDoStmts :: DsMonad q => Maybe ModName -> [Stmt] -> q DExp
+dsExp :: DsMonad q => Exp -> q DExp
+dsFamilyResultSig ::
+  DsMonad q => FamilyResultSig -> q DFamilyResultSig
+dsForeign :: DsMonad q => Foreign -> q DForeign
+dsGuards :: DsMonad q => [(Guard, Exp)] -> DExp -> q DExp
+dsInfo :: DsMonad q => Info -> q DInfo
+dsLetDec :: DsMonad q => Dec -> q ([DLetDec], DExp -> DExp)
+dsLetDecs :: DsMonad q => [Dec] -> q ([DLetDec], DExp -> DExp)
+dsMatches :: DsMonad q => Name -> [Match] -> q [DMatch]
+dsPat :: DsMonad q => Pat -> PatM q DPat
+dsPatOverExp :: DsMonad q => Pat -> DExp -> q (DPat, DExp)
+dsPatSynDir :: DsMonad q => Name -> PatSynDir -> q DPatSynDir
+dsPatX :: DsMonad q => Pat -> q (DPat, [(Name, DExp)])
+dsPatsOverExp :: DsMonad q => [Pat] -> DExp -> q ([DPat], DExp)
+dsPragma :: DsMonad q => Pragma -> q DPragma
+dsPred :: DsMonad q => Pred -> q DCxt
+dsReify :: DsMonad q => Name -> q (Maybe DInfo)
+dsReifyType :: DsMonad q => Name -> q (Maybe DType)
+dsRuleBndr :: DsMonad q => RuleBndr -> q DRuleBndr
+dsTvb :: DsMonad q => TyVarBndr_ flag -> q (DTyVarBndr flag)
+dsTvbSpec :: DsMonad q => TyVarBndrSpec -> q DTyVarBndrSpec
+dsTvbUnit :: DsMonad q => TyVarBndrUnit -> q DTyVarBndrUnit
+dsType :: DsMonad q => Type -> q DType
+dsTypeArg :: DsMonad q => TypeArg -> q DTypeArg
+dsTypeFamilyHead ::
+  DsMonad q => TypeFamilyHead -> q DTypeFamilyHead
+dsVarBangType :: DsMonad q => VarBangType -> q DVarBangType
+expToTH :: DExp -> Exp
+expand :: (DsMonad q, Data.Data.Data a) => a -> q a
+expandType :: DsMonad q => DType -> q DType
+extractBoundNamesDPat ::
+  DPat -> Language.Haskell.TH.Desugar.OSet.OSet Name
+extractBoundNamesDec ::
+  Dec -> Language.Haskell.TH.Desugar.OSet.OSet Name
+extractBoundNamesPat ::
+  Pat -> Language.Haskell.TH.Desugar.OSet.OSet Name
+extractBoundNamesStmt ::
+  Stmt -> Language.Haskell.TH.Desugar.OSet.OSet Name
+filterDTANormals :: [DTypeArg] -> [DType]
+filterDVisFunArgs :: DFunArgs -> [DVisFunArg]
+filterTANormals :: [TypeArg] -> [Type]
+filterVisFunArgs :: FunArgs -> [VisFunArg]
+foreignToTH :: DForeign -> Foreign
+fvDType :: DType -> Language.Haskell.TH.Desugar.OSet.OSet Name
+getDataD ::
+  DsMonad q =>
+  String -> Name -> q (DataFlavor, [TyVarBndrUnit], [Con])
+isTypeKindName :: Name -> Bool
+letDecToTH :: DLetDec -> Dec
+lookupTypeNameWithLocals :: DsMonad q => String -> q (Maybe Name)
+lookupValueNameWithLocals :: DsMonad q => String -> q (Maybe Name)
+matchToTH :: DMatch -> Match
+matchTy :: IgnoreKinds -> DType -> DType -> Maybe DSubst
+maybeDCaseE :: MatchContext -> DExp -> [DMatch] -> DExp
+maybeDLetE :: [DLetDec] -> DExp -> DExp
+mkDLamEFromDPats :: Quasi q => [DPat] -> DExp -> q DExp
+mkDataName :: Quasi q => String -> q Name
+mkDataNameWithLocals :: DsMonad q => String -> q Name
+mkTupleDExp :: [DExp] -> DExp
+mkTupleDPat :: [DPat] -> DPat
+mkTypeName :: Quasi q => String -> q Name
+mkTypeNameWithLocals :: DsMonad q => String -> q Name
+nameOccursIn :: Data.Data.Data a => Name -> a -> Bool
+newUniqueName :: Quasi q => String -> q Name
+patSynDirToTH :: DPatSynDir -> PatSynDir
+patToTH :: DPat -> Pat
+pragmaToTH :: DPragma -> Pragma
+predToTH :: DPred -> Pred
+ravelDType :: DFunArgs -> DType -> DType
+ravelType :: FunArgs -> Type -> Type
+reifyFixityWithLocals :: DsMonad q => Name -> q (Maybe Fixity)
+reifyNameSpace :: DsMonad q => Name -> q (Maybe NameSpace)
+reifyTypeWithLocals :: DsMonad q => Name -> q Type
+reifyTypeWithLocals_maybe :: DsMonad q => Name -> q (Maybe Type)
+reifyWithLocals :: DsMonad q => Name -> q Info
+reifyWithLocals_maybe :: DsMonad q => Name -> q (Maybe Info)
+reifyWithWarning :: (Quasi q, MonadFail q) => Name -> q Info
+removeWilds :: DsMonad q => DPat -> q DPat
+ruleBndrToTH :: DRuleBndr -> RuleBndr
+scExp :: DsMonad q => DExp -> q DExp
+scLetDec :: DsMonad q => DLetDec -> q DLetDec
+substForallTelescope ::
+  Quasi q =>
+  DSubst -> DForallTelescope -> q (DSubst, DForallTelescope)
+substTy :: Quasi q => DSubst -> DType -> q DType
+substTyVarBndrs ::
+  Quasi q =>
+  DSubst -> [DTyVarBndr flag] -> q (DSubst, [DTyVarBndr flag])
+toposortKindVarsOfTvbs :: [DTyVarBndr flag] -> [DTyVarBndrUnit]
+toposortTyVarsOf :: [DType] -> [DTyVarBndrUnit]
+tupleNameDegree_maybe :: Name -> Maybe Int
+tvbToTH :: DTyVarBndr flag -> TyVarBndr_ flag
+typeArgToTH :: DTypeArg -> TypeArg
+typeKindName :: Name
+typeToTH :: DType -> Type
+unboxedSumNameDegree_maybe :: Name -> Maybe Int
+unboxedTupleNameDegree_maybe :: Name -> Maybe Int
+unfoldDType :: DType -> (DType, [DTypeArg])
+unfoldType :: Type -> (Type, [TypeArg])
+unionMaybeSubsts :: [Maybe DSubst] -> Maybe DSubst
+unionSubsts :: DSubst -> DSubst -> Maybe DSubst
+unravelDType :: DType -> (DFunArgs, DType)
+unravelType :: Type -> (FunArgs, Type)
+withLocalDeclarations :: DsMonad q => [Dec] -> DsM q a -> q a
+ghci> 

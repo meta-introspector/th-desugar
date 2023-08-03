@@ -1,0 +1,30 @@
+#browse.txt#:dsReify :: DsMonad q => Name -> q (Maybe DInfo)
+#browse.txt#:dsReifyType :: DsMonad q => Name -> q (Maybe DType)
+CHANGES.md:* Add `dsReifyType`, `reifyTypeWithLocals_maybe`, and `reifyTypeWithLocals`,
+grep: dist-newstyle/build/x86_64-linux/ghc-9.2.8/th-desugar-1.16/build/libHSth-desugar-1.16-inplace.a: binary file matches
+grep: dist-newstyle/build/x86_64-linux/ghc-9.2.8/th-desugar-1.16/build/libHSth-desugar-1.16-inplace-ghc9.2.8.so: binary file matches
+grep: dist-newstyle/build/x86_64-linux/ghc-9.2.8/th-desugar-1.16/build/Language/Haskell/TH/Desugar.hi: binary file matches
+grep: dist-newstyle/build/x86_64-linux/ghc-9.2.8/th-desugar-1.16/build/Language/Haskell/TH/Desugar.dyn_hi: binary file matches
+grep: dist-newstyle/build/x86_64-linux/ghc-9.2.8/th-desugar-1.16/build/Language/Haskell/TH/Desugar/Match.hi: binary file matches
+grep: dist-newstyle/build/x86_64-linux/ghc-9.2.8/th-desugar-1.16/build/Language/Haskell/TH/Desugar/Core.hi: binary file matches
+grep: dist-newstyle/build/x86_64-linux/ghc-9.2.8/th-desugar-1.16/build/Language/Haskell/TH/Desugar/Match.dyn_hi: binary file matches
+grep: dist-newstyle/build/x86_64-linux/ghc-9.2.8/th-desugar-1.16/build/Language/Haskell/TH/Desugar/Core.dyn_hi: binary file matches
+grep: dist-newstyle/build/x86_64-linux/ghc-9.2.8/th-desugar-1.16/build/Language/Haskell/TH/Desugar/Match.o: binary file matches
+grep: dist-newstyle/build/x86_64-linux/ghc-9.2.8/th-desugar-1.16/build/Language/Haskell/TH/Desugar/Core.o: binary file matches
+grep: dist-newstyle/build/x86_64-linux/ghc-9.2.8/th-desugar-1.16/build/Language/Haskell/TH/Desugar/Core.dyn_o: binary file matches
+grep: dist-newstyle/build/x86_64-linux/ghc-9.2.8/th-desugar-1.16/build/Language/Haskell/TH/Desugar/Match.dyn_o: binary file matches
+Language/Haskell/TH/Desugar.hs:  withLocalDeclarations, dsReify, dsReifyType,
+Language/Haskell/TH/Desugar.hs:as 'dsReify', 'reifyWithLocals', or similar functions that have a 'DsMonad'
+Language/Haskell/TH/Desugar/Match.hs:import Language.Haskell.TH.Desugar.Core (dsReify, maybeDLetE, mkTupleDExp)
+Language/Haskell/TH/Desugar/Match.hs:      Just (DTyConI tycon_dec _) <- dsReify ty_name
+Language/Haskell/TH/Desugar/Core.hs:dsReify :: DsMonad q => Name -> q (Maybe DInfo)
+Language/Haskell/TH/Desugar/Core.hs:dsReify = traverse dsInfo <=< reifyWithLocals_maybe
+Language/Haskell/TH/Desugar/Core.hs:dsReifyType :: DsMonad q => Name -> q (Maybe DType)
+Language/Haskell/TH/Desugar/Core.hs:dsReifyType = traverse dsType <=< reifyTypeWithLocals_maybe
+Test/ReifyTypeSigs.hs:             actual_kind <- dsReifyType $ mkName $ "A" ++ show i
+Test/Run.hs:       info <- withLocalDeclarations decs (dsReify (mkName "unT"))
+Test/Run.hs:              actual_info <- dsReify sel_name
+Test/Run.hs:         Just (DVarI _ actual_ty _) <- dsReify getT1
+Test/Run.hs:                                      Just i <- dsReify n
+Test/ReifyTypeCUSKs.hs:             actual_kind <- dsReifyType $ mkName $ prefix ++ show i
+Test/#ReifyTypeCUSKs.hs#:             actual_kind <- dsReifyType $ mkName $ prefix ++ show i

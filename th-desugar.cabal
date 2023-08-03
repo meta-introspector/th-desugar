@@ -71,6 +71,7 @@ library
                       Server.MetaCoq.TestMeta3
                       Server.MetaCoq.TestMeta4
                       Server.MetaCoq.TestMeta5
+                      Server.MetaCoq.TestMeta6
   other-modules:      Language.Haskell.TH.Desugar.AST
                       Language.Haskell.TH.Desugar.Core
                       Language.Haskell.TH.Desugar.FV
